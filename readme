@@ -1,0 +1,138 @@
+NAME
+    File::MSWord
+
+VERSION
+    Version 0.1
+
+DESCRIPTION
+    File::MSWord - Perl module to parse MSWord OLE compound documents
+    without relying on the MS API. Neither MSOffice nor MSWord need to be
+    installed to use this module. The intent of this module is to provide a
+    cross-platform method for retrieving metadata from MSWord documents.
+    This module parses binary information in the file headers, and
+    lists/dumps the various streams and 'trash'.
+
+    All methods return binary values in little-endian order, unless
+    otherwise specified.
+
+DEPENDENCIES
+    OLE::Storage OLE::PropertySet Startup Carp
+
+    All of the above modules can be installed on ActiveState Perl using the
+    PPM command. Consult your documentation for the specifics of how to
+    install the modules for platforms other than Win32.
+
+SYNOPSIS
+    See file testwd.pl
+
+METHODS
+  my $word = File::MSWord::new()
+    Creates a new $word object.
+
+  @guid = $word->getGUID();
+    Returns a 2-element list containing the halves of the GUID, in
+    little-endian order.
+
+  %doc = $word->getDocBinaryData();
+    Returns a hash containing various elements of binary header information
+    located in the file.
+
+  @ids = $word->getMagicIDs()
+    Returns IDS for creator/reviser apps (ie, Word version)
+
+  @dates = $word->getBuildDates()
+    Returns 2 DWORDS holding the build dates of the creator/reviser apps
+
+  @list = $word->getSavedBy()
+    Returns 2 DWORDS corresponding to the offset within the table stream of
+    the list of names (of users who have saved this document, alternating
+    with the path the file was saved to), and the size of the buffer.
+
+  @list = $word->getDocUndo()
+    Returns 2 DWORDS (offset, size) of undocumented undo information saved
+    in the table stream. This is one of several "undocumented" areas of
+    undo/versioning information listed in the primary reference.
+
+  @list = $word->getUndocOCX()
+    Returns 2 DWORDS (offset,size) of undocumented OCX data within the table
+    stream.
+
+  @list = $word->getLastModified()
+    Returns 2 DWORDS corresponding to the last modified FILETIME object.
+    This information can be fed to a routine using Math::BigInt and gmtime()
+    to return something readable.
+
+  @list = $word->getRoutingSlip()
+    Returns 2 DWORDS (offset,size) corresponding to the routing slip
+    information maintained in the table stream.
+
+  @list = $word->getTwoDWORDs($offset)
+    Takes an offset within the file information block (FIB) and returns 2
+    DWORDS located in 8 bytes starting at that offset.
+
+  %hash = $word->listStreams()
+    Returns a hash of hashes containing the names of the streams of the
+    OLE/compound/structured storage document as the keys.
+
+  %hash = $word->getSummaryInfo()
+    Returns a hash containing elements of the SummaryInformation stream
+
+  %hash = $word->getDocSummaryInfo()
+    Returns a hash containing elements of the DocumentSummaryInformation
+    stream
+
+  $buffer = $word->readStreamTable($offset,$size)
+    Takes in an offset and size of a buffer within the table stream, and
+    returns the contents of the buffer.
+
+  %hash = $word->parseSTTBF($buffer[,$name1,$name2])
+    Takes a buffer (extracted from the table stream) and parses it out into
+    a hash of hashes, whose keys are the order (1,2,3...) of the entries.
+    Optionally, you can pass in the names of the subkeys.
+
+  $landid = $word->getLangID($id)
+    Translates the language id from the FIB into something readable.
+
+  %hash = $word->readTrash()
+    Reads the trash bins in an OLE/compound/structured storage document.
+    Returns a hash of hashes with the names of the trash bins as keys, and
+    the size and contents of the bins as subkeys.
+
+REFERENCES
+    The primary reference for this module is:
+    http://63.230.221.50/ports/textproc/wv/work/wv-0.7.1/notes/convert-to-st
+    ruct/demo.txt
+
+    Metadata in MSWord documents has been an issue for quite a while
+
+    See: http://www.computerbytesman.com/privacy/blair.htm
+    http://blogs.washingtonpost.com/securityfix/2005/12/document_securi.html
+    http://www.forbes.com/2005/12/13/microsoft-word-merck_cx_de_1214word.htm
+    l
+
+    MS KB 290945: How to minimize metadata in Word 2002
+    http://support.microsoft.com/kb/290945 *Contains links to KB articles
+    for MSWord 97,2000,2003
+
+AUTHOR
+    Harlan Carvey, <keydet89 at yahoo dot com>
+
+ACKNOWLEDGEMENTS
+    Richard Smith, the ComputerBytesMan
+    http://www.computerbytesman.com/privacy/blair.htm
+
+DOCUMENTATION
+    You can find documentation for this module using the perldoc command.
+
+BUGS
+    Please report any bugs and feature requests to keydet89 at yahoo dot
+    com.
+
+TODO
+COPYRIGHT AND LICENSE
+    Copyright (C) 2006 by Harlan Carvey (keydet89 at yahoo dot com)
+
+    This library is free software; you can redistribute it and/or modify it
+    as you like. However, please be sure to provide proper credit where it
+    is due.
+
